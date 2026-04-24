@@ -1,0 +1,50 @@
+# TASKS: Cimientos y Flujo Básico de Datos (CHG-001)
+
+## 🛠️ Fase 1: Infraestructura y Persistencia Local
+- [ ] **T1.1: Setup de Entorno Angular 21**
+  - Crear la estructura de carpetas `src/app/core`, `src/app/features`, `src/app/shared`.
+  - Configurar el proyecto como Standalone.
+- [ ] **T1.2: Implementación de `LocalDbService`**
+  - Instalar la librería `idb`.
+  - Crear la clase `LocalDbService` con la lógica de apertura de base de datos.
+  - Definir los Object Stores: `persons`, `purchases`, `installments`, `payments`.
+  - Implementar métodos genéricos: `getAll<T>`, `put`, `delete`.
+- [ ] **T1.3: Verificación de Persistencia**
+  - Crear un test simple o script para verificar que se pueden guardar y leer datos de IndexedDB.
+
+## 🧠 Fase 2: Capa de Estado y Lógica de Dominio
+- [ ] **T2.1: Implementación de `DebtStateService` (The Signal Store)**
+  - Crear el servicio con señales escribibles (`signal`) para las 4 entidades.
+  - Implementar la señal computada `totalDebt` (Suma de cuotas pendientes - pagos).
+  - Implementar la señal computada `debtByPerson` (Mapa de saldos por persona).
+- [ ] **T2.2: Implementación de `DebtService` (The Coordinator)**
+  - Implementar `loadInitialData()` para hidratar las señales desde `LocalDbService`.
+  - Implementar `addPerson(name: string)`: Guardar en DB $\rightarrow$ Actualizar Signal.
+  - Implementar `addPurchase(data)`: 
+    - Usar `PaymentEngine` para generar cuotas.
+    - Guardar compra y cuotas en DB (Transacción).
+    - Actualizar Signals.
+- [ ] **T2.3: Integración del `PaymentEngine`**
+  - Importar el `PaymentEngine` validado en el `DebtService`.
+
+## 🎨 Fase 3: Interfaz de Usuario (UI)
+- [ ] **T3.1: `DashboardComponent`**
+  - Crear componente standalone.
+  - Implementar visualización del `totalDebt()` y la lista de personas con su saldo.
+- [ ] **T3.2: `PersonFormComponent`**
+  - Crear componente standalone.
+  - Implementar formulario de entrada y llamada a `DebtService.addPerson()`.
+- [ ] **T3.3: `PurchaseFormComponent`**
+  - Crear componente standalone.
+  - Implementar formulario con select de personas, monto y cuotas.
+  - Llamar a `DebtService.addPurchase()`.
+- [ ] **T3.4: Ensamblado en `AppComponent`**
+  - Organizar los componentes en la vista principal para un flujo coherente.
+
+## 🧪 Fase 4: Verificación Final y QA
+- [ ] **T4.1: Test de Flujo Completo (End-to-End)**
+  - Validar: Crear Persona $\rightarrow$ Crear Compra $\rightarrow$ Verificar Dashboard.
+- [ ] **T4.2: Test de Persistencia**
+  - Validar que los datos sobreviven a un refresco de página (F5).
+- [ ] **T4.3: Validación de Invariantes**
+  - Verificar que no existan floats en la DB y que la distribución de cuotas sea exacta.
