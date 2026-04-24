@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { DebtStateService } from '../../core/debt-state.service';
 
 @Component({
@@ -23,12 +24,12 @@ import { DebtStateService } from '../../core/debt-state.service';
 
         <div class="list-grid">
           @for (person of state.personsWithBalance(); track person.id) {
-            <div class="person-card">
+            <div class="person-card" (click)="goToDetails(person.id)">
               <div class="person-info">
                 <span class="person-name">{{ person.name }}</span>
                 <span class="person-balance">{{ formatCurrency(person.balance) }}</span>
               </div>
-              <button class="detail-btn" [attr.onclick]="'goToDetails(\"' + person.id + '\")'">
+              <button class="detail-btn">
                 Ver detalle
               </button>
             </div>
@@ -45,13 +46,17 @@ import { DebtStateService } from '../../core/debt-state.service';
           <span>+</span>
           <span class="fab-label">Persona</span>
         </button>
+        <button class="fab-add-purchase" (click)="addPurchase()">
+          <span>🛒</span>
+          <span class="fab-label">Compra</span>
+        </button>
       </footer>
     </div>
   `,
   styles: [`
     .dashboard-container {
       padding: 1rem;
-      max-width: 500px;
+      max-width: 1200px;
       margin: 0 auto;
       font-family: system-ui, -apple-system, sans-serif;
       background-color: #f8f9fa;
@@ -62,33 +67,39 @@ import { DebtStateService } from '../../core/debt-state.service';
     .dashboard-header {
       margin-bottom: 2rem;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
     }
 
     .dashboard-header h1 {
-      font-size: 1.5rem;
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
       color: #333;
-      margin-bottom: 1rem;
+      margin: 0;
     }
 
     .total-balance-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 1.5rem;
+      padding: clamp(1.5rem, 5vh, 3rem);
       border-radius: 1.5rem;
       box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+      max-width: 600px;
     }
 
     .total-balance-card .label {
-      font-size: 0.9rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
       opacity: 0.9;
       margin-bottom: 0.5rem;
     }
 
     .total-balance-card .amount {
-      font-size: 2.5rem;
+      font-size: clamp(2rem, 8vw, 3.5rem);
       font-weight: bold;
     }
 
@@ -100,8 +111,8 @@ import { DebtStateService } from '../../core/debt-state.service';
     }
 
     .list-grid {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1rem;
     }
 
@@ -114,6 +125,7 @@ import { DebtStateService } from '../../core/debt-state.service';
       justify-content: space-between;
       align-items: center;
       transition: transform 0.2s;
+      cursor: pointer;
     }
 
     .person-card:active {
@@ -158,22 +170,32 @@ import { DebtStateService } from '../../core/debt-state.service';
       position: fixed;
       bottom: 2rem;
       right: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    .fab-add-person {
+    .fab-add-person, .fab-add-purchase {
       width: 60px;
       height: 60px;
       border-radius: 30px;
-      background: #764ba2;
       color: white;
       border: none;
-      box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.5rem;
       position: relative;
+    }
+
+    .fab-add-person {
+      background: #764ba2;
+    }
+
+    .fab-add-purchase {
+      background: #2ecc71;
     }
 
     .fab-label {
@@ -190,13 +212,15 @@ import { DebtStateService } from '../../core/debt-state.service';
       pointer-events: none;
     }
 
-    .fab-add-person:hover .fab-label {
+    .fab-add-person:hover .fab-label, .fab-add-purchase:hover .fab-label {
       opacity: 1;
     }
   `]
 })
 export class DashboardComponent {
+
   public state = inject(DebtStateService);
+  private router = inject(Router);
 
   formatCurrency(cents: number): string {
     return new Intl.NumberFormat('es-CO', {
@@ -207,12 +231,14 @@ export class DashboardComponent {
   }
 
   goToDetails(personId: string) {
-    console.log('Navegando al detalle de la persona:', personId);
-    // Implementaremos routing más adelante
+    this.router.navigate(['/person', personId]);
   }
 
   addPerson() {
-    console.log('Abriendo modal de nueva persona');
-    // Implementaremos el flujo de creación
+    this.router.navigate(['/persons']);
+  }
+
+  addPurchase() {
+    this.router.navigate(['/purchase']);
   }
 }

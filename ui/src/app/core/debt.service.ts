@@ -33,14 +33,14 @@ export class DebtService {
   }
 
   /**
-   * Registra una nueva persona.
+   * Registra una nueva persona con configuración de ciclos.
    */
-  async addPerson(name: string): Promise<void> {
+  async addPersonExtended(name: string, closingDay: number, dueDay: number): Promise<void> {
     const person: Person = {
       id: crypto.randomUUID(),
       name: name,
-      closingDay: 15,
-      dueDay: 5
+      closingDay: closingDay,
+      dueDay: dueDay
     };
 
     await this.db.put('persons', person);
@@ -48,6 +48,36 @@ export class DebtService {
     // Actualizar estado reactivo
     const currentPersons = await this.db.getAll<Person>('persons');
     this.state.updatePersons(currentPersons);
+  }
+
+  /**
+   * Elimina una persona y sus registros asociados.
+   */
+  async deletePerson(id: string): Promise<void> {
+    await this.db.delete('persons', id);
+    
+    // Limpiar compras y cuotas asociadas para evitar huérfanos
+    const purchases = await this.db.getAll<Purchase>('purchases');
+    const personPurchases = purchases.filter(p => p.personId === id);
+    
+    for (const p of personPurchases) {
+      await this.db.delete('purchases', p.id);
+      const installments = await this.db.getAll<Installment>('installments');
+      const pInstallments = installments.filter(i => i.purchaseId === p.id);
+      for (const inst of pInstallments) {
+        await this.db.delete('installments', inst.id);
+      }
+    }
+
+    const currentPersons = await this.db.getAll<Person>('persons');
+    this.state.updatePersons(currentPersons);
+  }
+
+  /**
+   * Registra una nueva persona (Versión simplificada).
+   */
+  async addPerson(name: string): Promise<void> {
+    await this.addPersonExtended(name, 15, 5);
   }
 
   /**
