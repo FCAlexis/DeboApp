@@ -3,6 +3,7 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PersonsComponent } from './features/persons/persons.component';
 import { PurchaseComponent } from './features/purchases/purchase.component';
 import { PersonDetailComponent } from './features/persons/person-detail.component';
+import { PaymentComponent } from './features/payments/payment.component';
 
 export const routes: Routes = [
   {
@@ -25,5 +26,9 @@ export const routes: Routes = [
   {
     path: 'person/:id',
     component: PersonDetailComponent
+  },
+  {
+    path: 'payment/:id',
+    component: PaymentComponent
   }
 ];

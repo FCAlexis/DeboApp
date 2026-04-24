@@ -17,15 +17,23 @@ import { DebtService } from '../../core/debt.service';
 
       @if (person()) {
         <main class="content">
-          <section class="balance-card">
-            <div class="balance-info">
-              <span class="label">Saldo Pendiente</span>
-              <span class="amount">{{ formatCurrency(personBalance()) }}</span>
-            </div>
-            <button class="add-purchase-btn" (click)="addNewPurchase()">
-              + Nueva Compra
-            </button>
-          </section>
+    <div class="balance-card">
+      <div class="balance-info">
+        <span class="label">Saldo Pendiente</span>
+        <span class="amount">{{ formatCurrency(personBalance()) }}</span>
+      </div>
+      <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+        <button class="add-purchase-btn" (click)="addNewPurchase()">
+          + Compra
+        </button>
+        <button class="pay-btn" (click)="goToPayment()" style="background: #2ecc71; color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 0.8rem; font-weight: bold; cursor: pointer;">
+          Abonar
+        </button>
+      </div>
+    </div>
+  `,
+  styles: [`
+
 
           <section class="installments-section">
             <h2 class="section-title">Cuotas Pendientes</h2>
@@ -287,5 +295,10 @@ export class PersonDetailComponent {
 
   goBack() {
     this.router.navigate(['/dashboard']);
+  }
+
+  goToPayment() {
+    const id = this.person()?.id;
+    this.router.navigate(['/payment', id]);
   }
 }
