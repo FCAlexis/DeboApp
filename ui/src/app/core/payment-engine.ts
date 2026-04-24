@@ -11,13 +11,13 @@ export interface DebtItem {
 }
 
 export interface PaymentAllocation {
-  deudaId: string;
-  montoCentavos: number;
+  debtItemId: string;
+  amountCents: number;
 }
 
 export interface PaymentResult {
-  aplicadoTotal: number;
-  restante: number;
+  totalAppliedCents: number;
+  remainingCents: number;
   allocations: PaymentAllocation[];
 }
 
@@ -76,16 +76,16 @@ export class PaymentEngine {
       const aplicado = Math.min(restante, saldo);
 
       allocations.push({
-        deudaId: deuda.id,
-        montoCentavos: aplicado
+        debtItemId: deuda.id,
+        amountCents: aplicado
       });
 
       restante -= aplicado;
     }
 
     return {
-      aplicadoTotal: montoPagoCentavos - restante,
-      restante: restante,
+      totalAppliedCents: montoPagoCentavos - restante,
+      remainingCents: restante,
       allocations: allocations
     };
   }

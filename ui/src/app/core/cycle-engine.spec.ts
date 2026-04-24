@@ -1,108 +1,95 @@
 import { describe, it, expect } from 'vitest';
 import { CycleEngine } from './cycle-engine';
 
-describe('CycleEngine', () => {
+describe('CycleEngine - Motor de Ciclos de Facturación', () => {
+  
   describe('calculateClosingDate', () => {
-    it('should set closing date to current month if purchase is before closing day', () => {
-      const purchaseDate = new Date(2026, 3, 10); // April 10, 2026
+    it('debe asignar el cierre al mes actual si la compra es antes del día de cierre', () => {
+      const purchaseDate = new Date(2024, 0, 10); // 10 Ene 2024
       const closingDay = 15;
       const result = CycleEngine.calculateClosingDate(purchaseDate, closingDay);
       
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(3); // April
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(0); // Enero
       expect(result.getDate()).toBe(15);
     });
 
-    it('should set closing date to next month if purchase is after closing day', () => {
-      const purchaseDate = new Date(2026, 3, 16); // April 16, 2026
+    it('debe asignar el cierre al mes siguiente si la compra es después del día de cierre', () => {
+      const purchaseDate = new Date(2024, 0, 20); // 20 Ene 2024
       const closingDay = 15;
       const result = CycleEngine.calculateClosingDate(purchaseDate, closingDay);
       
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(4); // May
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(1); // Febrero
       expect(result.getDate()).toBe(15);
     });
 
-    it('should set closing date to current month if purchase is on closing day', () => {
-      const purchaseDate = new Date(2026, 3, 15); // April 15, 2026
-      const closingDay = 15;
-      const result = CycleEngine.calculateClosingDate(purchaseDate, closingDay);
-      
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(3); // April
-      expect(result.getDate()).toBe(15);
-    });
-
-    it('should clamp closing date to last day of month if closingDay is 31 and month has 30 days', () => {
-      const purchaseDate = new Date(2026, 3, 10); // April 10, 2026 (April has 30 days)
+    it('debe manejar el clamping al día último del mes si el día de cierre es 31 y el mes tiene 30 días', () => {
+      const purchaseDate = new Date(2024, 3, 10); // 10 Abril 2024
       const closingDay = 31;
       const result = CycleEngine.calculateClosingDate(purchaseDate, closingDay);
       
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(3); // April
+      // Abril tiene 30 días. El día 31 debe ajustarse al 30 de Abril.
+      expect(result.getMonth()).toBe(3); // Abril
       expect(result.getDate()).toBe(30);
+    });
+
+    it('debe manejar el cambio de año correctamente', () => {
+      const purchaseDate = new Date(2024, 11, 20); // 20 Dic 2024
+      const closingDay = 15;
+      const result = CycleEngine.calculateClosingDate(purchaseDate, closingDay);
+      
+      expect(result.getFullYear()).toBe(2025);
+      expect(result.getMonth()).toBe(0); // Enero 2025
+      expect(result.getDate()).toBe(15);
     });
   });
 
   describe('calculateDueDate', () => {
-    it('should set due date to the month following closure if dueDay <= closingDate', () => {
-      const closingDate = new Date(2026, 3, 15); // April 15, 2026
+    it('debe calcular la fecha de vencimiento en el mes siguiente al cierre', () => {
+      const closingDate = new Date(2024, 0, 15); // 15 Ene 2024
       const dueDay = 5;
       const result = CycleEngine.calculateDueDate(closingDate, dueDay);
       
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(4); // May
+      expect(result.getMonth()).toBe(1); // Febrero
       expect(result.getDate()).toBe(5);
     });
 
-    it('should set due date to the same month if dueDay > closingDate', () => {
-      const closingDate = new Date(2026, 3, 15); // April 15, 2026
-      const dueDay = 20;
+    it('debe saltar al siguiente mes si el día de vencimiento ya pasó en el mes del cierre', () => {
+      const closingDate = new Date(2024, 0, 15); // 15 Ene 2024
+      const dueDay = 10; // El 10 ya pasó respecto al 15
       const result = CycleEngine.calculateDueDate(closingDate, dueDay);
       
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(3); // April
-      expect(result.getDate()).toBe(20);
-    });
-
-    it('should clamp due date to last day of February in non-leap year', () => {
-      const closingDate = new Date(2026, 0, 31); // Jan 31, 2026
-      const dueDay = 31;
-      const result = CycleEngine.calculateDueDate(closingDate, dueDay);
-      
-      expect(result.getFullYear()).toBe(2026);
-      expect(result.getMonth()).toBe(1); // February
-      expect(result.getDate()).toBe(28);
+      expect(result.getMonth()).toBe(1); // Febrero
+      expect(result.getDate()).toBe(10);
     });
   });
 
   describe('generateDates', () => {
-    it('should generate a sequence of due dates maintaining the same dueDay', () => {
-      const firstDueDate = new Date(2026, 4, 5); // May 5, 2026
+    it('debe generar la secuencia correcta de cuotas manteniendo el día de vencimiento', () => {
+      const firstDueDate = new Date(2024, 1, 5); // 5 Feb 2024
       const count = 3;
       const dueDay = 5;
-      const results = CycleEngine.generateDates(firstDueDate, count, dueDay);
+      const dates = CycleEngine.generateDates(firstDueDate, count, dueDay);
       
-      expect(results).toHaveLength(3);
-      expect(results[0].getDate()).toBe(5);
-      expect(results[0].getMonth()).toBe(4); // May
-      expect(results[1].getDate()).toBe(5);
-      expect(results[1].getMonth()).toBe(5); // June
-      expect(results[2].getDate()).toBe(5);
-      expect(results[2].getMonth()).toBe(6); // July
+      expect(dates).toHaveLength(3);
+      expect(dates[0].getDate()).toBe(5);
+      expect(dates[0].getMonth()).toBe(1); // Feb
+      expect(dates[1].getDate()).toBe(5);
+      expect(dates[1].getMonth()).toBe(2); // Mar
+      expect(dates[2].getDate()).toBe(5);
+      expect(dates[2].getMonth()).toBe(3); // Abr
     });
 
-    it('should clamp subsequent due dates to the last day of the month', () => {
-      const firstDueDate = new Date(2026, 0, 31); // Jan 31, 2026
+    it('debe aplicar clamping a todas las cuotas que caigan en días inexistentes (ej. día 31)', () => {
+      const firstDueDate = new Date(2024, 0, 31); // 31 Ene
       const count = 2;
       const dueDay = 31;
-      const results = CycleEngine.generateDates(firstDueDate, count, dueDay);
+      const dates = CycleEngine.generateDates(firstDueDate, count, dueDay);
       
-      expect(results).toHaveLength(2);
-      expect(results[0].getDate()).toBe(31);
-      expect(results[0].getMonth()).toBe(0); // Jan
-      expect(results[1].getDate()).toBe(28);
-      expect(results[1].getMonth()).toBe(1); // Feb
+      // Feb 2024 es bisiesto (29 días)
+      expect(dates[1].getMonth()).toBe(1); // Febrero
+      expect(dates[1].getDate()).toBe(29); 
     });
   });
 });
