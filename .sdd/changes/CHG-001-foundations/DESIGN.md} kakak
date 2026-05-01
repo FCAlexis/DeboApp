@@ -1,0 +1,67 @@
+# DESIGN: Cimientos y Flujo Básico de Datos (CHG-001)
+
+## 🏗️ Arquitectura de Software
+
+### 1. Flujo de Datos (Data Flow)
+El sistema seguirá un flujo unidireccional para evitar inconsistencias:
+`UI Component` $\rightarrow$ `DebtService (Action)` $\rightarrow$ `LocalDbService (Persistence)` $\rightarrow$ `DebtStateService (Signal Update)` $\rightarrow$ `UI Component (Reactive Render)`
+
+### 2. Definición de la Base de Datos Local (IndexedDB)
+Se crearán los siguientes Object Stores (tablas):
+- `persons`: `{ id: UUID, name: string, ... }` - Index by `id`.
+- `purchases`: `{ id: UUID, personId: UUID, totalCents: number, ... }` - Index by `personId`.
+- `installments`: `{ id: UUID, purchaseId: UUID, personId: UUID, amountCents: number, ... }` - Index by `personId`.
+- `payments`: `{ id: UUID, personId: UUID, amountCents: number, ... }` - Index by `personId`.
+
+### 3. Modelo de Estado (Angular Signals)
+Para garantizar la reactividad instantánea, el `DebtStateService` implementará:
+
+#### Señales de Fuente (Writables)
+- `persons = signal<Person[]>([])`
+- `purchases = signal<Purchase[]>([])`
+- `installments = signal<Installment[]>([])`
+- `payments = signal<Payment[]>([])`
+
+#### Señales Derivadas (Computed)
+- `totalDebt = computed(() => ...)` $\rightarrow$ Suma de cuotas pendientes menos pagos.
+- `debtByPerson = computed(() => ...)` $\rightarrow$ Mapa de `{ personId: saldo }`.
+- `allPeopleWithBalance = computed(() => ...)` $\rightarrow$ Lista de personas enriquecida con su saldo actual.
+
+---
+
+## 📂 Estructura de Componentes (Angular 21)
+
+### `DashboardComponent` (Standalone)
+- **Responsabilidad:** Visualización de resúmenes globales.
+- **Dependencias:** `DebtStateService`.
+- **UI:** Card de total global + Lista de personas con saldo.
+
+### `PersonFormComponent` (Standalone)
+- **Responsabilidad:** Entrada de nuevas personas.
+- **Dependencias:** `DebtService`.
+- **UI:** Input de nombre + Botón guardar.
+
+### `PurchaseFormComponent` (Standalone) (Standalone)
+- **Responsabilidad:** Entrada de nuevas compras y generación de cuotas.
+- **Dependencias:** `DebtService`.
+- **UI:** Select de persona + Input monto + Input cuotas $\rightarrow$ Botón guardar.
+
+---
+
+## 🛠️ Firma de Métodos (API Interna)
+
+### `LocalDbService`
+- `async getAll<T>(store: string): Promise<T[]>`
+- `async put(store: string, item: any): Promise<void>`
+- `async delete(store: string, id: string): Promise<void>`
+
+### `DebtService`
+- `async addPerson(name: string): Promise<void>`
+- `async addPurchase(purchaseData: PurchaseRequest): Promise<void>`
+- `async loadInitialData(): Promise<void>` $\rightarrow$ Carga todo de IndexedDB a las Signals al iniciar la app.
+
+---
+
+## 🛡️ Estrategia de Validación
+- **Sincronización:** El `DebtService` debe actualizar la DB local primero y luego disparar la actualización de la Signal para asegurar que la UI nunca muestre datos que no fueron persistidos.
+- **Atocimidad:** La creación de cuotas se manejará mediante un bucle de `put` en la DB local antes de actualizar la señal de cuotas.
