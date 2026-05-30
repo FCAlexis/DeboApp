@@ -1,7 +1,12 @@
 {
   "name": "deboapp",
   "version": "0.0.0",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -9,8 +14,6 @@
     "test": "ng test",
     "serve:ssr:deboapp": "node dist/deboapp/server/server.mjs"
   },
-  "private": true,
-  "packageManager": "npm@11.9.0",
   "dependencies": {
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",

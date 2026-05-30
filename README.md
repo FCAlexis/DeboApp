@@ -47,11 +47,11 @@ DeboApp está construida con **Tauri**, lo que permite distribuir la aplicación
    ```
 2. Instalar dependencias:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Ejecutar en modo desarrollo:
    ```bash
-   npm start
+   pnpm start
    ```
 
 ## 🗺️ Roadmap
