@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { LocalDbService } from './local-db.service';
 import { DebtStateService } from './debt-state.service';
 import { Person, Purchase, Installment, Payment } from '../models/debt.model';
-import { PaymentEngine } from '../payment-engine';
+import { PaymentEngine, PaymentResult } from '../payment-engine';
 import { CycleEngine } from '../cycle-engine';
 
 @Injectable({
@@ -25,10 +25,10 @@ export class DebtService {
       this.db.getAll<Payment>('payments'),
     ]);
 
-    this.state.updatePersons(persons);
-    this.state.updatePurchases(purchases);
-    this.state.updateInstallments(installments);
-    this.state.updatePayments(payments);
+    this.state.setPersons(persons);
+    this.state.setPurchases(purchases);
+    this.state.setInstallments(installments);
+    this.state.setPayments(payments);
   }
 
   /**
@@ -43,33 +43,33 @@ export class DebtService {
     };
 
     await this.db.put('persons', person);
-    
-    // Actualizar estado reactivo
-    const currentPersons = await this.db.getAll<Person>('persons');
-    this.state.updatePersons(currentPersons);
+    this.state.addPerson(person);
   }
 
   /**
    * Elimina una persona y sus registros asociados.
    */
   async deletePerson(id: string): Promise<void> {
+    // Obtener datos asociados desde el estado (sin golpear la DB)
+    const personPurchases = this.state.purchases().filter(p => p.personId === id);
+    const purchaseIds = new Set(personPurchases.map(p => p.id));
+    const personInstallments = this.state.installments().filter(
+      i => i.personId === id || purchaseIds.has(i.purchaseId)
+    );
+
+    // Borrar de la DB
     await this.db.delete('persons', id);
-    
-    // Limpiar compras y cuotas asociadas para evitar huérfanos
-    const purchases = await this.db.getAll<Purchase>('purchases');
-    const personPurchases = purchases.filter(p => p.personId === id);
-    
     for (const p of personPurchases) {
       await this.db.delete('purchases', p.id);
-      const installments = await this.db.getAll<Installment>('installments');
-      const pInstallments = installments.filter(i => i.purchaseId === p.id);
-      for (const inst of pInstallments) {
-        await this.db.delete('installments', inst.id);
-      }
+    }
+    for (const inst of personInstallments) {
+      await this.db.delete('installments', inst.id);
     }
 
-    const currentPersons = await this.db.getAll<Person>('persons');
-    this.state.updatePersons(currentPersons);
+    // Actualizar estado reactivo sin releer la DB
+    this.state.removePerson(id);
+    this.state.removePurchasesByPersonId(id);
+    this.state.removeInstallmentsByPersonId(id);
   }
 
   /**
@@ -93,9 +93,8 @@ export class DebtService {
       createdAt: new Date()
     };
 
-    // 1. Obtener configuración de la tarjeta de la persona
-    const persons = await this.db.getAll<Person>('persons');
-    const person = persons.find(p => p.id === personId);
+    // 1. Obtener configuración de la tarjeta de la persona (desde el estado)
+    const person = this.state.persons().find(p => p.id === personId);
     if (!person) throw new Error("La persona no existe");
 
     // 2. Generar fechas de vencimiento usando el motor de ciclos
@@ -120,25 +119,22 @@ export class DebtService {
       });
     }
 
-    // 4. Persistencia Atómica (en la medida de lo posible en IndexedDB)
+    // 4. Persistencia en DB
     await this.db.put('purchases', purchase);
     for (const inst of installments) {
       await this.db.put('installments', inst);
     }
 
-    // 5. Actualizar Estado Reactivo
-    const currentPurchases = await this.db.getAll<Purchase>('purchases');
-    const currentInstallments = await this.db.getAll<Installment>('installments');
-    
-    this.state.updatePurchases(currentPurchases);
-    this.state.updateInstallments(currentInstallments);
+    // 5. Actualizar Estado Reactivo (sin releer la DB)
+    this.state.addPurchase(purchase);
+    this.state.addInstallments(installments);
   }
 
   /**
    * Registra un pago y distribuye el monto usando el PaymentEngine.
-   * Ahora actualiza físicamente cada cuota afectada en la base de datos.
+   * @returns El resultado de la distribución (allocations, remaining, etc.)
    */
-  async registerPayment(personId: string, amountCents: number): Promise<void> {
+  async registerPayment(personId: string, amountCents: number): Promise<PaymentResult> {
     const paymentId = crypto.randomUUID();
     const payment: Payment = {
       id: paymentId,
@@ -147,11 +143,9 @@ export class DebtService {
       paymentDate: new Date()
     };
 
-    // 1. Obtener cuotas actuales para el motor
-    const allInstallments = await this.db.getAll<Installment>('installments');
+    // 1. Obtener cuotas desde el estado (sin golpear la DB)
+    const allInstallments = this.state.installments();
     
-    // Adaptar datos al formato que requiere el PaymentEngine (DebtItem)
-    // IMPORTANTE: Ahora incluimos el monto ya pagado para que el motor sepa cuánto falta
     const debtItems = allInstallments
       .filter(i => i.personId === personId)
       .map(i => ({
@@ -169,22 +163,19 @@ export class DebtService {
 
     // 3. Persistir el Pago Global
     await this.db.put('payments', payment);
+    this.state.addPayment(payment);
 
-    // 4. Persistir la distribución (Actualizar cada cuota afectada)
+    // 4. Persistir y actualizar cada cuota afectada
     for (const allocation of result.allocations) {
       const installment = allInstallments.find(i => i.id === allocation.debtItemId);
       if (installment) {
         installment.amountPaidCents = (installment.amountPaidCents || 0) + allocation.amountCents;
         await this.db.put('installments', installment);
+        this.state.updateInstallment(installment);
       }
     }
 
-    // 5. Actualizar Estado Reactivo (Sincronizar Signals)
-    const currentPayments = await this.db.getAll<Payment>('payments');
-    const currentInstallments = await this.db.getAll<Installment>('installments');
-    
-    this.state.updatePayments(currentPayments);
-    this.state.updateInstallments(currentInstallments);
+    return result;
   }
 
 }
