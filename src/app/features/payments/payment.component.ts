@@ -1,10 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DebtService } from '../../core/services/debt.service';
 import { DebtStateService } from '../../core/services/debt-state.service';
-import { PaymentAllocation, PaymentResult, PaymentEngine } from '../../core/payment-engine';
+import { PaymentResult } from '../../core/payment-engine';
 
 @Component({
   selector: 'app-payment',
@@ -148,47 +149,51 @@ import { PaymentAllocation, PaymentResult, PaymentEngine } from '../../core/paym
 })
 export class PaymentComponent {
   private debtService = inject(DebtService);
-  public state = inject(DebtStateService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
+  public state = inject(DebtStateService);
 
-  public personName = signal('Cargando...');
-  public currentBalance = signal(0);
+  // Única señal de entrada: el id desde la ruta
+  public personId = signal<string | null>(null);
+
+  // Derivaciones reactivas
+  public personName = computed(() => {
+    const id = this.personId();
+    if (!id) return 'Cargando...';
+    const person = this.state.persons().find(p => p.id === id);
+    return person ? person.name : 'Persona no encontrada';
+  });
+
+  public currentBalance = computed(() => {
+    const id = this.personId();
+    return id ? (this.state.debtByPerson()[id] || 0) : 0;
+  });
+
+  // Estado del formulario (no reactivo, solo ngModel)
   public paymentAmount = 0;
   
+  // Estado de UI del receipt (sí necesita signals)
   public showReceipt = signal(false);
   public lastPaymentCents = signal(0);
   public lastResult = signal<PaymentResult | null>(null);
 
   constructor() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      const person = this.state.persons().find(p => p.id === id);
-      this.personName.set(person ? person.name : 'Persona no encontrada');
-      const balances = this.state.debtByPerson();
-      this.currentBalance.set(balances[id] || 0);
-    }
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        this.personId.set(params.get('id'));
+      });
   }
 
   async savePayment() {
     try {
-      const id = this.route.snapshot.paramMap.get('id');
+      const id = this.personId();
       if (!id) throw new Error('No se encontró el ID de la persona');
       const amountCents = Math.round(this.paymentAmount * 100);
-      
-      const allInstallments = this.state.installments().filter(i => i.personId === id);
-      const debtItems = allInstallments.map(i => ({
-        id: i.id,
-        tipo: 'CUOTA' as const,
-        personaId: i.personId,
-        fechaVencimiento: i.dueDate,
-        createdAt: new Date(), 
-        montoTotalCentavos: i.amountCents,
-        montoPagadoCentavos: i.amountPaidCents || 0
-      }));
 
-      const result = PaymentEngine.distribuirPago(id, amountCents, debtItems);
-      await this.debtService.registerPayment(id, amountCents);
+      // registerPayment ahora devuelve el PaymentResult real
+      const result = await this.debtService.registerPayment(id, amountCents);
       
       this.lastPaymentCents.set(amountCents);
       this.lastResult.set(result);
@@ -200,12 +205,12 @@ export class PaymentComponent {
   }
 
   finishPayment() {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.personId();
     this.router.navigate(['/person', id]);
   }
 
   goBack() {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.personId();
     this.router.navigate(['/person', id || '/dashboard']);
   }
 

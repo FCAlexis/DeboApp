@@ -38,6 +38,32 @@ export class DebtStateService {
     return this.payments().reduce((acc, p) => acc + p.amountCents, 0);
   });
 
+  // Todas las cuotas pendientes enriquecidas con el nombre de la persona
+  allPendingInstallments = computed(() => {
+    const persons = this.persons();
+    return this.installments()
+      .filter(i => i.amountPaidCents < i.amountCents)
+      .map(i => {
+        const person = persons.find(p => p.id === i.personId);
+        return {
+          ...i,
+          personName: person ? person.name : 'Desconocido'
+        };
+      });
+  });
+
+  // Historial global de pagos enriquecido con el nombre de la persona
+  globalPaymentHistory = computed(() => {
+    const persons = this.persons();
+    return this.payments().map(p => {
+      const person = persons.find(pers => pers.id === p.personId);
+      return {
+        ...p,
+        personName: person ? person.name : 'Desconocido'
+      };
+    });
+  });
+
   // Tasa de recuperación (Porcentaje de deuda pagada)
   recoveryRate = computed(() => {
     const totalInstallments = this.installments().reduce((acc, i) => acc + i.amountCents, 0);
@@ -60,12 +86,10 @@ export class DebtStateService {
   debtByPerson = computed(() => {
     const balances: Record<string, number> = {};
 
-    // Sumar cuotas
     this.installments().forEach(i => {
       balances[i.personId] = (balances[i.personId] || 0) + i.amountCents;
     });
 
-    // Restar pagos
     this.payments().forEach(p => {
       balances[p.personId] = (balances[p.personId] || 0) - p.amountCents;
     });
@@ -113,28 +137,59 @@ export class DebtStateService {
     return alerts;
   });
 
-  // --- State Updates ---
-  
-  async updatePersons(persons: Person[]) {
+  // --- State Updates (Bulk — for initial load only) ---
+
+  setPersons(persons: Person[]) {
     this.persons.set(persons);
   }
 
-  async updatePurchases(purchases: Purchase[]) {
+  setPurchases(purchases: Purchase[]) {
     this.purchases.set(purchases);
   }
 
-  async updateInstallments(installments: Installment[]) {
+  setInstallments(installments: Installment[]) {
     this.installments.set(installments);
   }
 
-  async updatePayments(payments: Payment[]) {
+  setPayments(payments: Payment[]) {
     this.payments.set(payments);
   }
 
-  /**
-   * Escanea los vencimientos actuales y dispara notificaciones.
-   * Debe llamarse al iniciar la sesión o cargar datos.
-   */
+  // --- Direct Mutations (no re-read from DB needed) ---
+
+  addPerson(person: Person) {
+    this.persons.update(prev => [...prev, person]);
+  }
+
+  removePerson(id: string) {
+    this.persons.update(prev => prev.filter(p => p.id !== id));
+  }
+
+  addPurchase(purchase: Purchase) {
+    this.purchases.update(prev => [...prev, purchase]);
+  }
+
+  addInstallments(installments: Installment[]) {
+    if (installments.length === 0) return;
+    this.installments.update(prev => [...prev, ...installments]);
+  }
+
+  removePurchasesByPersonId(personId: string) {
+    this.purchases.update(prev => prev.filter(p => p.personId !== personId));
+  }
+
+  removeInstallmentsByPersonId(personId: string) {
+    this.installments.update(prev => prev.filter(i => i.personId !== personId));
+  }
+
+  updateInstallment(installment: Installment) {
+    this.installments.update(prev => prev.map(i => i.id === installment.id ? installment : i));
+  }
+
+  addPayment(payment: Payment) {
+    this.payments.update(prev => [...prev, payment]);
+  }
+
   checkVencimientos() {
     const alerts = this.pendingAlerts();
     

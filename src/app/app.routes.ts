@@ -6,6 +6,8 @@ import { PurchaseComponent } from './features/purchases/purchase.component';
 import { PaymentComponent } from './features/payments/payment.component';
 import { PlaceholderComponent } from './core/components/placeholder.component';
 import { BackupComponent } from './features/backup/backup.component';
+import { DebtsComponent } from './features/debts/debts.component';
+import { PaymentsListComponent } from './features/payments/payments-list.component';
 
 export const routes: Routes = [
   {
@@ -38,8 +40,14 @@ export const routes: Routes = [
     component: BackupComponent
   },
   // Rutas en Desarrollo (Placeholder)
-  { path: 'debts', component: PlaceholderComponent },
-  { path: 'payments', component: PlaceholderComponent },
+  {
+    path: 'debts',
+    component: DebtsComponent
+  },
+  {
+    path: 'payments',
+    component: PaymentsListComponent
+  },
   { path: 'calendar', component: PlaceholderComponent },
   { path: 'reports', component: PlaceholderComponent },
   { path: 'settings', component: PlaceholderComponent },

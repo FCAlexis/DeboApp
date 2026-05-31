@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DebtStateService } from '../../core/services/debt-state.service';
 import { Person, Purchase, Installment } from '../../core/models/debt.model';
-import { DebtService } from '../../core/services/debt.service';
 
 export type InstallmentStatus = 'PAID' | 'OVERDUE' | 'COMING_SOON' | 'FUTURE';
 
@@ -521,33 +521,44 @@ export type InstallmentStatus = 'PAID' | 'OVERDUE' | 'COMING_SOON' | 'FUTURE';
 export class PersonDetailComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   public state = inject(DebtStateService);
 
-  public person = signal<Person | null>(null);
-  public personBalance = signal<number>(0);
-  public personPurchases = signal<Purchase[]>([]);
-  public personInstallments = signal<Installment[]>([]);
+  // Única signal de entrada: el id desde la ruta
+  public personId = signal<string | null>(null);
 
-  constructor() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadPersonData(id);
-    }
-  }
+  // Todo lo demás se DERIVA reactivamente
+  public person = computed(() => {
+    const id = this.personId();
+    return id ? this.state.persons().find(p => p.id === id) ?? null : null;
+  });
 
-  loadPersonData(id: string) {
-    const p = this.state.persons().find(p => p.id === id);
-    if (p) {
-      this.person.set(p);
-      const balances = this.state.debtByPerson();
-      this.personBalance.set(balances[id] || 0);
-      this.personPurchases.set(this.state.purchases().filter(pur => pur.personId === id));
-      this.personInstallments.set(
-        this.state.installments()
+  public personBalance = computed(() => {
+    const id = this.personId();
+    return id ? (this.state.debtByPerson()[id] || 0) : 0;
+  });
+
+  public personPurchases = computed(() => {
+    const id = this.personId();
+    return id ? this.state.purchases().filter(p => p.personId === id) : [];
+  });
+
+  public personInstallments = computed(() => {
+    const id = this.personId();
+    return id
+      ? this.state.installments()
           .filter(inst => inst.personId === id)
           .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
-      );
-    }
+      : [];
+  });
+
+  constructor() {
+    // Escuchamos cambios en la ruta reactivamente
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        this.personId.set(params.get('id'));
+      });
   }
 
   formatCurrency(cents: number): string {
