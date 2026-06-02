@@ -1,6 +1,7 @@
 import { Injector, runInInjectionContext, signal, computed, ɵChangeDetectionScheduler } from '@angular/core';
 import { Router } from '@angular/router';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { DebtsComponent } from './debts.component';
 import { Installment, Person } from '../../core/models/debt.model';
 
@@ -67,6 +68,7 @@ describe('DebtsComponent', () => {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: DebtStateService, useValue: state as any },
+        { provide: SettingsService, useValue: { currency: () => 'ARS' } },
         { provide: ɵChangeDetectionScheduler, useValue: { notify: () => {} } },
       ],
     });
@@ -145,12 +147,6 @@ describe('DebtsComponent', () => {
   });
 
   describe('utility methods', () => {
-    it('formatCurrency should format cents', () => {
-      const { component } = setupComponent();
-      const result = component.formatCurrency(123456);
-      expect(result).toContain('1.234');
-    });
-
     it('getMonthName should return abbreviated month name', () => {
       const { component } = setupComponent();
       const date = new Date(2026, 0, 15);

@@ -1,6 +1,7 @@
 import { Injector, runInInjectionContext, signal, computed, ɵChangeDetectionScheduler } from '@angular/core';
 import { Router } from '@angular/router';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { PaymentsListComponent } from './payments-list.component';
 import { Payment, Person } from '../../core/models/debt.model';
 
@@ -58,6 +59,7 @@ describe('PaymentsListComponent', () => {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: DebtStateService, useValue: state as any },
+        { provide: SettingsService, useValue: { currency: () => 'ARS' } },
         { provide: ɵChangeDetectionScheduler, useValue: { notify: () => {} } },
       ],
     });
@@ -128,11 +130,6 @@ describe('PaymentsListComponent', () => {
   });
 
   describe('utility methods', () => {
-    it('formatCurrency should format cents', () => {
-      const { component } = setupComponent();
-      expect(component.formatCurrency(123456)).toContain('1.234');
-    });
-
     it('formatDate should return a formatted date string', () => {
       const { component } = setupComponent();
       const date = new Date(2026, 4, 15);

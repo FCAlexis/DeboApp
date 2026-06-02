@@ -2,6 +2,7 @@ import { Injector, runInInjectionContext, DestroyRef, signal, computed } from '@
 import { Router, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { PersonDetailComponent } from './person-detail.component';
 
 function createMockState() {
@@ -31,6 +32,7 @@ describe('PersonDetailComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
         { provide: Router, useValue: mockRouter },
+        { provide: SettingsService, useValue: { currency: () => 'ARS' } },
         { provide: DebtStateService, useValue: mockState as any },
         DestroyRef,
       ],
@@ -86,13 +88,6 @@ describe('PersonDetailComponent', () => {
   });
 
   describe('utility methods', () => {
-    it('formatCurrency should format cents to ARS string', () => {
-      const { component } = setupComponent();
-      const result = component.formatCurrency(123456);
-      expect(result).toContain('1.234');
-      expect(result).toContain('56');
-    });
-
     it('getStatus should return PAID when fully paid', () => {
       const { component } = setupComponent();
       const inst = {

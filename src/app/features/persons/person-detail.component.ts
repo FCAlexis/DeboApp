@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatCurrency } from '../../core/utils/format-currency';
 import { Person, Purchase, Installment } from '../../core/models/debt.model';
 
 export type InstallmentStatus = 'PAID' | 'OVERDUE' | 'COMING_SOON' | 'FUTURE';
@@ -519,6 +521,7 @@ export type InstallmentStatus = 'PAID' | 'OVERDUE' | 'COMING_SOON' | 'FUTURE';
   `]
 })
 export class PersonDetailComponent {
+  private settings = inject(SettingsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -561,13 +564,9 @@ export class PersonDetailComponent {
       });
   }
 
-  formatCurrency(cents: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(cents / 100);
-  }
+  formatCurrency = (cents: number): string => {
+    return formatCurrency(cents, this.settings.currency());
+  };
 
   formatDate(date: Date): string {
     return date.toLocaleDateString('es-AR', {
