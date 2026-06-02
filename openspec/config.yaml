@@ -1,9 +1,11 @@
 schema: spec-driven
 
 context: |
-  Tech stack: Angular 21, TypeScript
+  Tech stack: Angular 21, TypeScript 5.9, Standalone Components, Signals
   Architecture: Local-First, Precision Finance (Cents), Credit Card Cycle Logic
-  Testing: Vitest
+  Package manager: pnpm
+  Platform: Web + Tauri (desktop)
+  Testing: Vitest + JSDOM (unit), Playwright (E2E)
   Style: Prettier
 
 strict_tdd: true
@@ -25,22 +27,25 @@ rules:
   apply:
     - Follow existing code patterns and conventions
     - Load relevant coding skills for the project stack
+    test_command: "npx vitest"
   verify:
     - Run tests if test infrastructure exists
     - Compare implementation against every spec scenario
+    test_command: "npx vitest"
+    build_command: "ng build"
   archive:
     - Warn before merging destructive deltas (large removals)
 
 testing:
   strict_tdd_mode: enabled
-  detected: 2026-04-24
+  detected: 2026-05-30
   test_runner:
     command: npx vitest
     framework: Vitest
   layers:
     unit: available
     integration: not_installed
-    e2e: not_installed
+    e2e: available
   coverage:
     available: true
     command: npx vitest --coverage

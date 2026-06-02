@@ -18,6 +18,22 @@ A purchase SHALL include:
 - THEN the purchase SHALL be persisted
 - AND 3 installments SHALL be generated with amounts [33334, 33333, 33333]
 
+### Requirement: Installment Generation with Card Cycle
+
+When generating installments, the system MUST calculate due dates based on the card's billing cycle (closing day and due day).
+
+#### Scenario: First installment due date when purchase before closing
+- GIVEN a purchase made on April 10th
+- AND a card with closingDay=15 and dueDay=5
+- WHEN the system generates installments
+- THEN the first installment SHALL be due on May 5th
+
+#### Scenario: First installment due date when purchase after closing
+- GIVEN a purchase made on April 16th
+- AND a card with closingDay=15 and dueDay=5
+- WHEN the system generates installments
+- THEN the first installment SHALL be due on June 5th
+
 ### Requirement: Atomic Purchase Creation
 
 The system MUST create the purchase and all its installments in a single atomic transaction. If any installment fails, the entire operation SHALL be rolled back.
@@ -32,29 +48,3 @@ The system MUST reject purchases with:
 - GIVEN the user attempts to create a purchase with totalCents=0
 - WHEN the system validates the input
 - THEN the operation SHALL be rejected with an error message
-
-### Requirement: Cycle-Based Installment Generation
-
-The system MUST generate payment installments based on the results of the `billing-cycle-calculation` capability instead of simple month addition.
-
-#### Scenario: Accurate first installment date
-- GIVEN a purchase made on April 10th
-- GIVEN a card with `closingDay` = 15 and `dueDay` = 5
-- WHEN the system generates installments
-- THEN the first installment MUST be due on May 5th.
-
-#### Scenario: Accurate first installment date (late purchase)
-- GIVEN a purchase made on April 16th
-- GIVEN a card with `closingDay` = 15 and `dueDay` = 5
-- WHEN the system generates installments
-- THEN the first installment MUST be due on June 5th.
-
-#### Scenario: Consistency of subsequent due dates
-- GIVEN a first installment due on May 5th
-- WHEN generating a 3-installment plan
-- THEN installment 2 MUST be due on June 5th AND installment 3 MUST be due on July 5th.
-
-#### Scenario: Handling month-end overflow for subsequent installments
-- GIVEN a first installment due on January 31st
-- WHEN generating a 2-installment plan
-- THEN installment 2 MUST be due on February 28th (or 29th in leap years).

@@ -192,6 +192,9 @@ import { DebtStateService } from '../../core/services/debt-state.service';
       outline: none;
       transition: all 0.2s;
       background: var(--bg-light);
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .input:focus {
@@ -208,6 +211,7 @@ import { DebtStateService } from '../../core/services/debt-state.service';
 
     .btn-primary {
       width: 100%;
+      min-width: 0;
       padding: 0.9rem;
       background: var(--primary-color);
       color: white;
@@ -245,6 +249,7 @@ import { DebtStateService } from '../../core/services/debt-state.service';
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      min-width: 0;
     }
 
     .contact-card {
@@ -327,6 +332,30 @@ import { DebtStateService } from '../../core/services/debt-state.service';
       display: block;
       margin-bottom: 0.75rem;
       opacity: 0.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .form-card {
+        padding: 1rem;
+      }
+      .list-section {
+        padding: 1rem;
+      }
+      .input {
+        padding: 0.5rem 0.75rem;
+      }
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .delete-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+      .back-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
     }
   `]
 })

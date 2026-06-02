@@ -1,5 +1,4 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { LocalDbService } from './local-db.service';
 import { Person, Purchase, Installment, Payment } from '../models/debt.model';
 import { NotificationService } from './notification.service';
 
@@ -20,7 +19,6 @@ export class DebtStateService {
   payments = signal<Payment[]>([]);
 
   constructor(
-    private db: LocalDbService,
     private notify: NotificationService
   ) {}
 
