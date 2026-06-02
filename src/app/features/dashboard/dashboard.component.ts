@@ -2,6 +2,8 @@ import { Component, inject, AfterViewInit, effect, computed } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatCurrency } from '../../core/utils/format-currency';
 import { Chart, ChartData } from 'chart.js/auto';
 import { Installment } from '../../core/models/debt.model';
 
@@ -869,6 +871,7 @@ import { Installment } from '../../core/models/debt.model';
 })
 export class DashboardComponent implements AfterViewInit {
   public state = inject(DebtStateService);
+  private settings = inject(SettingsService);
   private router = inject(Router);
 
   private debtsChart: Chart | null = null;
@@ -1030,13 +1033,9 @@ export class DashboardComponent implements AfterViewInit {
     };
   }
 
-  formatCurrency(cents: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(cents / 100);
-  }
+  formatCurrency = (cents: number): string => {
+    return formatCurrency(cents, this.settings.currency());
+  };
 
   formatDate(date: Date | undefined): string {
     if (!date) return 'N/A';

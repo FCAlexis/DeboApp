@@ -5,6 +5,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DebtService } from '../../core/services/debt.service';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatCurrency } from '../../core/utils/format-currency';
 import { PaymentResult } from '../../core/payment-engine';
 
 @Component({
@@ -149,6 +151,7 @@ import { PaymentResult } from '../../core/payment-engine';
 })
 export class PaymentComponent {
   private debtService = inject(DebtService);
+  private settings = inject(SettingsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
@@ -214,11 +217,7 @@ export class PaymentComponent {
     this.router.navigate(['/person', id || '/dashboard']);
   }
 
-  formatCurrency(cents: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(cents / 100);
-  }
+  formatCurrency = (cents: number): string => {
+    return formatCurrency(cents, this.settings.currency());
+  };
 }

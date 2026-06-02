@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DebtService } from '../../core/services/debt.service';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 
 @Component({
   selector: 'app-persons',
@@ -361,19 +362,20 @@ import { DebtStateService } from '../../core/services/debt-state.service';
 })
 export class PersonsComponent {
   private debtService = inject(DebtService);
+  private settings = inject(SettingsService);
   public state = inject(DebtStateService);
   private router = inject(Router);
 
   public newPerson = {
     name: '',
-    closingDay: 15,
-    dueDay: 5
+    closingDay: this.settings.defaultClosingDay(),
+    dueDay: this.settings.defaultDueDay()
   };
 
   async savePerson() {
     try {
       await this.debtService.addPersonExtended(this.newPerson.name, this.newPerson.closingDay, this.newPerson.dueDay);
-      this.newPerson = { name: '', closingDay: 15, dueDay: 5 };
+      this.newPerson = { name: '', closingDay: this.settings.defaultClosingDay(), dueDay: this.settings.defaultDueDay() };
     } catch (e) {
       console.error('Error guardando persona:', e);
     }

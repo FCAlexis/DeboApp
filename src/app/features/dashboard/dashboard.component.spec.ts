@@ -1,6 +1,7 @@
 import { Injector, runInInjectionContext, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LocalDbService } from '../../core/services/local-db.service';
 import { DashboardComponent } from './dashboard.component';
@@ -129,6 +130,7 @@ describe('DashboardComponent', () => {
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: DebtStateService, useValue: mockState as any },
+        { provide: SettingsService, useValue: { currency: () => 'ARS' } },
         { provide: LocalDbService, useValue: {} },
         { provide: NotificationService, useValue: { show: vi.fn(), error: vi.fn(), info: vi.fn() } },
       ],
@@ -244,19 +246,6 @@ describe('DashboardComponent', () => {
   });
 
   describe('utility methods', () => {
-    it('formatCurrency should format cents to ARS string', () => {
-      const { component } = setupComponent();
-      const result = component.formatCurrency(123456);
-      expect(result).toContain('1.234');
-      expect(result).toContain('56');
-    });
-
-    it('formatCurrency should handle zero', () => {
-      const { component } = setupComponent();
-      const result = component.formatCurrency(0);
-      expect(result).toContain('0');
-    });
-
     it('goToDetails should navigate to person detail', () => {
       const { component, mockRouter } = setupComponent();
       component.goToDetails('p1');

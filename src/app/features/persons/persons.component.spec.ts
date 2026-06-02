@@ -2,6 +2,7 @@ import { Injector, runInInjectionContext, signal, computed, ɵChangeDetectionSch
 import { Router } from '@angular/router';
 import { DebtService } from '../../core/services/debt.service';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { LocalDbService } from '../../core/services/local-db.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PersonsComponent } from './persons.component';
@@ -61,6 +62,7 @@ describe('PersonsComponent', () => {
         { provide: Router, useValue: mockRouter },
         { provide: DebtStateService, useValue: state as any },
         { provide: DebtService, useValue: mockDebtService },
+        { provide: SettingsService, useValue: { defaultClosingDay: () => 15, defaultDueDay: () => 5 } },
         { provide: LocalDbService, useValue: {} },
         { provide: NotificationService, useValue: { show: vi.fn(), error: vi.fn(), info: vi.fn() } },
         { provide: ɵChangeDetectionScheduler, useValue: { notify: () => {} } },

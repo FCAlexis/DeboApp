@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { DebtService } from '../../core/services/debt.service';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { PaymentComponent } from './payment.component';
 
 function createMockState() {
@@ -36,6 +37,7 @@ describe('PaymentComponent', () => {
     const injector = Injector.create({
       providers: [
         { provide: DebtService, useValue: { registerPayment: vi.fn() } },
+        { provide: SettingsService, useValue: { currency: () => 'ARS' } },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockRoute },
         { provide: DebtStateService, useValue: mockState as any },
@@ -97,10 +99,5 @@ describe('PaymentComponent', () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/person', '/dashboard']);
   });
 
-  it('should format currency correctly', () => {
-    const { component } = setupComponent();
-    const result = component.formatCurrency(123456);
-    expect(result).toContain('1.234');
-    expect(result).toContain('56');
-  });
+
 });

@@ -2,6 +2,8 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatCurrency } from '../../core/utils/format-currency';
 
 @Component({
   selector: 'app-debts',
@@ -324,6 +326,7 @@ import { DebtStateService } from '../../core/services/debt-state.service';
 })
 export class DebtsComponent {
   public state = inject(DebtStateService);
+  private settings = inject(SettingsService);
   private router = inject(Router);
 
   public filter = signal<'ALL' | 'OVERDUE' | 'PENDING'>('ALL');
@@ -360,13 +363,9 @@ export class DebtsComponent {
     this.filter.set(f);
   }
 
-  formatCurrency(cents: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(cents / 100);
-  }
+  formatCurrency = (cents: number): string => {
+    return formatCurrency(cents, this.settings.currency());
+  };
 
   getMonthName(date: Date): string {
     return date.toLocaleDateString('es-AR', { month: 'short' }).toUpperCase().substring(0, 3);

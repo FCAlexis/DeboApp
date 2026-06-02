@@ -2,6 +2,8 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DebtStateService } from '../../core/services/debt-state.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatCurrency } from '../../core/utils/format-currency';
 
 @Component({
   selector: 'app-payments-list',
@@ -339,6 +341,7 @@ import { DebtStateService } from '../../core/services/debt-state.service';
 })
 export class PaymentsListComponent {
   public state = inject(DebtStateService);
+  private settings = inject(SettingsService);
   private router = inject(Router);
 
   public searchTerm = signal('');
@@ -356,13 +359,9 @@ export class PaymentsListComponent {
     this.searchTerm.set(input.value);
   }
 
-  formatCurrency(cents: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(cents / 100);
-  }
+  formatCurrency = (cents: number): string => {
+    return formatCurrency(cents, this.settings.currency());
+  };
 
   formatDate(date: Date): string {
     return date.toLocaleDateString('es-AR', {
