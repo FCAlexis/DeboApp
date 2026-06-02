@@ -10,6 +10,7 @@ import { DebtsComponent } from './features/debts/debts.component';
 import { PaymentsListComponent } from './features/payments/payments-list.component';
 import { CalendarComponent } from './features/calendar/calendar.component';
 import { ReportsComponent } from './features/reports/reports.component';
+import { SettingsComponent } from './features/settings/settings.component';
 
 export const routes: Routes = [
   {
@@ -52,6 +53,6 @@ export const routes: Routes = [
   },
   { path: 'calendar', component: CalendarComponent },
   { path: 'reports', component: ReportsComponent },
-  { path: 'settings', component: PlaceholderComponent },
+  { path: 'settings', component: SettingsComponent },
   { path: 'help', component: PlaceholderComponent },
 ];
