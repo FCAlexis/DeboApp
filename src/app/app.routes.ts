@@ -4,13 +4,13 @@ import { PersonsComponent } from './features/persons/persons.component';
 import { PersonDetailComponent } from './features/persons/person-detail.component';
 import { PurchaseComponent } from './features/purchases/purchase.component';
 import { PaymentComponent } from './features/payments/payment.component';
-import { PlaceholderComponent } from './core/components/placeholder.component';
 import { BackupComponent } from './features/backup/backup.component';
 import { DebtsComponent } from './features/debts/debts.component';
 import { PaymentsListComponent } from './features/payments/payments-list.component';
 import { CalendarComponent } from './features/calendar/calendar.component';
 import { ReportsComponent } from './features/reports/reports.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { HelpComponent } from './features/help/help.component';
 
 export const routes: Routes = [
   {
@@ -54,5 +54,5 @@ export const routes: Routes = [
   { path: 'calendar', component: CalendarComponent },
   { path: 'reports', component: ReportsComponent },
   { path: 'settings', component: SettingsComponent },
-  { path: 'help', component: PlaceholderComponent },
+  { path: 'help', component: HelpComponent },
 ];
