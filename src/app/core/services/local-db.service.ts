@@ -89,6 +89,28 @@ export class LocalDbService {
     });
   }
 
+  /**
+   * Ejecuta múltiples operaciones en UNA sola transacción IndexedDB.
+   * Si alguna falla, IndexedDB revierte automáticamente TODAS las operaciones.
+   * 
+   * @param storeNames Stores involucradas en la transacción
+   * @param mode 'readonly' | 'readwrite'
+   * @param action Callback que recibe la transacción y ejecuta las operaciones
+   */
+  async runTransaction(
+    storeNames: string[],
+    mode: IDBTransactionMode,
+    action: (tx: IDBTransaction) => void
+  ): Promise<void> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = db!.transaction(storeNames, mode);
+      action(tx);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   async clearAll(): Promise<void> {
     const db = await this.init();
     const transaction = db!.transaction(this.storeNames, 'readwrite');

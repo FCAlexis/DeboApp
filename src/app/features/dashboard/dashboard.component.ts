@@ -12,7 +12,7 @@ import { Installment } from '../../core/models/debt.model';
   template: `
     <div class="dashboard-layout">
       <!-- Sidebar Desktop -->
-      <aside class="sidebar d-none d-lg-block">
+      <aside class="sidebar">
         <div class="sidebar-brand">
           <i class="bi bi-wallet2"></i> DeboApp
         </div>
@@ -247,7 +247,7 @@ import { Installment } from '../../core/models/debt.model';
       </main>
 
       <!-- Bottom Nav Mobile -->
-      <nav class="bottom-nav d-lg-none">
+      <nav class="bottom-nav">
         <a [routerLink]="['/dashboard']" routerLinkActive="active" class="bottom-nav-item">
           <i class="bi bi-house-door-fill"></i>
           <span>Resumen</span>
@@ -829,12 +829,40 @@ import { Installment } from '../../core/models/debt.model';
       cursor: pointer;
     }
 
-    /* Responsive */
-    @media (max-width: 992px) {
+    /* Responsive — Mobile-first: sidebar hidden by default, visible on desktop */
+    @media (max-width: 1024px) {
+      .sidebar { display: none; }
+      .bottom-nav { display: flex; }
+    }
+    @media (min-width: 1024px) {
+      .sidebar { display: block; }
+      .bottom-nav { display: none; }
+    }
+
+    /* Mobile: collapse grids to single column */
+    @media (max-width: 600px) {
       .main-content {
-        margin-left: 0;
         padding: 16px;
-        padding-bottom: 80px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      .chart-card {
+        min-width: 0;
+      }
+      .chart-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chart-container {
+        height: 180px;
+      }
+      .btn-icon {
+        min-width: 44px;
+        min-height: 44px;
       }
     }
   `]

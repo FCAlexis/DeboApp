@@ -57,14 +57,16 @@ export class DebtService {
       i => i.personId === id || purchaseIds.has(i.purchaseId)
     );
 
-    // Borrar de la DB
-    await this.db.delete('persons', id);
-    for (const p of personPurchases) {
-      await this.db.delete('purchases', p.id);
-    }
-    for (const inst of personInstallments) {
-      await this.db.delete('installments', inst.id);
-    }
+    // Borrado Atómico (todo en una sola transacción)
+    await this.db.runTransaction(['persons', 'purchases', 'installments'], 'readwrite', tx => {
+      tx.objectStore('persons').delete(id);
+      for (const p of personPurchases) {
+        tx.objectStore('purchases').delete(p.id);
+      }
+      for (const inst of personInstallments) {
+        tx.objectStore('installments').delete(inst.id);
+      }
+    });
 
     // Actualizar estado reactivo sin releer la DB
     this.state.removePerson(id);
@@ -83,6 +85,13 @@ export class DebtService {
    * Registra una compra y genera automáticamente sus cuotas.
    */
   async addPurchase(personId: string, description: string, totalCents: number, installmentCount: number): Promise<void> {
+    // --- Validaciones ---
+    if (totalCents <= 0) throw new Error('El monto total debe ser mayor a cero');
+    if (installmentCount <= 0) throw new Error('La cantidad de cuotas debe ser mayor a cero');
+
+    const person = this.state.persons().find(p => p.id === personId);
+    if (!person) throw new Error('La persona no existe');
+
     const purchaseId = crypto.randomUUID();
     const purchase: Purchase = {
       id: purchaseId,
@@ -93,16 +102,12 @@ export class DebtService {
       createdAt: new Date()
     };
 
-    // 1. Obtener configuración de la tarjeta de la persona (desde el estado)
-    const person = this.state.persons().find(p => p.id === personId);
-    if (!person) throw new Error("La persona no existe");
-
-    // 2. Generar fechas de vencimiento usando el motor de ciclos
+    // Generar fechas de vencimiento usando el motor de ciclos
     const closingDate = CycleEngine.calculateClosingDate(purchase.createdAt, person.closingDay);
     const firstDueDate = CycleEngine.calculateDueDate(closingDate, person.dueDay);
     const dueDates = CycleEngine.generateDates(firstDueDate, installmentCount, person.dueDay);
 
-    // 3. Generar cuotas
+    // Generar cuotas
     const installments: Installment[] = [];
     const amountPerInstallment = Math.floor(totalCents / installmentCount);
     const remainder = totalCents % installmentCount;
@@ -119,13 +124,15 @@ export class DebtService {
       });
     }
 
-    // 4. Persistencia en DB
-    await this.db.put('purchases', purchase);
-    for (const inst of installments) {
-      await this.db.put('installments', inst);
-    }
+    // Persistencia Atómica (todo en una sola transacción)
+    await this.db.runTransaction(['purchases', 'installments'], 'readwrite', tx => {
+      tx.objectStore('purchases').put(purchase);
+      for (const inst of installments) {
+        tx.objectStore('installments').put(inst);
+      }
+    });
 
-    // 5. Actualizar Estado Reactivo (sin releer la DB)
+    // Actualizar Estado Reactivo (sin releer la DB)
     this.state.addPurchase(purchase);
     this.state.addInstallments(installments);
   }
@@ -161,16 +168,23 @@ export class DebtService {
     // 2. Ejecutar Motor de Distribución
     const result = PaymentEngine.distribuirPago(personId, amountCents, debtItems);
 
-    // 3. Persistir el Pago Global
-    await this.db.put('payments', payment);
-    this.state.addPayment(payment);
+    // 3. Persistencia Atómica (pago + cuotas afectadas en una sola transacción)
+    await this.db.runTransaction(['payments', 'installments'], 'readwrite', tx => {
+      tx.objectStore('payments').put(payment);
+      for (const allocation of result.allocations) {
+        const installment = allInstallments.find(i => i.id === allocation.debtItemId);
+        if (installment) {
+          installment.amountPaidCents = (installment.amountPaidCents || 0) + allocation.amountCents;
+          tx.objectStore('installments').put(installment);
+        }
+      }
+    });
 
-    // 4. Persistir y actualizar cada cuota afectada
+    // 4. Actualizar Estado Reactivo
+    this.state.addPayment(payment);
     for (const allocation of result.allocations) {
       const installment = allInstallments.find(i => i.id === allocation.debtItemId);
       if (installment) {
-        installment.amountPaidCents = (installment.amountPaidCents || 0) + allocation.amountCents;
-        await this.db.put('installments', installment);
         this.state.updateInstallment(installment);
       }
     }
