@@ -33,12 +33,13 @@ Components (read-only via state.persons(), state.installments(), etc.)
 | `PaymentsListComponent` | `/payments` | Global payment history | `globalPaymentHistory()`, `totalRecovered()`, `payments()` |
 | `DebtsComponent` | `/debts` | Global debts list with filter (all/overdue/pending) | `allPendingInstallments()`, `totalDebt()`, `debtHealth()` |
 | `CalendarComponent` | `/calendar` | Month grid of installment due dates | `allPendingInstallments()` |
+| `ReportsComponent` | `/reports` | Analytics: debt trend, per-person charts, payment distribution, CSV/JSON export | `monthlyInstallments()`, `paidByPerson()`, `personsWithPaid()`, `recoveryRate()`, `installments()`, `payments()` |
+| `SettingsComponent` | `/settings` | Currency, default closing/due day, delete data, export/import, about | — (uses `SettingsService`) |
+| `HelpComponent` | `/help` | Usage guide, FAQ, credit cycle explanation | — |
 | `BackupComponent` | `/backup` | Export/import JSON backup | — (uses `LocalDbService` directly — see exception below) |
 
 ### Placeholder Components
-| Component | Route | Responsibility |
-|-----------|-------|----------------|
-| `PlaceholderComponent` | `/reports`, `/settings`, `/help` | "Coming soon" screen with back button |
+*None — all routes are now implemented.*
 
 ## Services
 | Service | Responsibility |
@@ -47,6 +48,7 @@ Components (read-only via state.persons(), state.installments(), etc.)
 | `DebtService` | Business logic orchestration: coordinates DB writes + state updates in atomic operations |
 | `DebtStateService` | Signal-based state container: source of truth for all UI reads |
 | `NotificationService` | Toast notification manager |
+| `SettingsService` | App configuration (currency, defaults) via localStorage with signals |
 
 ## Models (debt.model.ts)
 | Model | Key Fields |
