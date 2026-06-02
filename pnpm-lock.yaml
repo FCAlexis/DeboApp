@@ -32,9 +32,15 @@ importers:
       '@angular/ssr':
         specifier: ^21.2.8
         version: 21.2.13(@angular/common@21.2.15(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(@angular/platform-server@21.2.15(@angular/common@21.2.15(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@21.2.15)(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(@angular/platform-browser@21.2.15(@angular/common@21.2.15(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/router@21.2.15(@angular/common@21.2.15(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(@angular/platform-browser@21.2.15(@angular/common@21.2.15(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)))(rxjs@7.8.2))
+      angular-calendar:
+        specifier: ^0.32.2
+        version: 0.32.2(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(angular-draggable-droppable@9.0.1(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)))(angular-resizable-element@8.0.3(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)))(date-fns@4.4.0)
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
+      date-fns:
+        specifier: ^4.4.0
+        version: 4.4.0
       express:
         specifier: ^5.1.0
         version: 5.2.1
@@ -817,6 +823,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@mattlewis92/dom-autoscroller@2.4.2':
+    resolution: {integrity: sha512-YbrUWREPGEjE/FU6foXcAT1YbVwqD/jkYnY1dFb0o4AxtP3s4xKBthlELjndZih8uwsDWgQZx1eNskRNe2BgZQ==}
+
   '@modelcontextprotocol/sdk@1.26.0':
     resolution: {integrity: sha512-Y5RmPncpiDtTXDbLKswIJzTqu2hyBKxTNsgKqKclDbhIgg1wgtf1fRuvxgTnRfcnxtvvgbIEcqUOzZrJ6iSReg==}
     engines: {node: '>=18'}
@@ -1301,6 +1310,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@scarf/scarf@1.4.0':
+    resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
+
   '@schematics/angular@21.2.13':
     resolution: {integrity: sha512-e5guslSLKbb3PJ6gUuVqM+V9xgn68cJkG1IyBohho34shbpOeoWW2eYdWQQjxvn0KUdgEhYSRBluBamCHngaUA==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
@@ -1524,6 +1536,30 @@ packages:
     resolution: {integrity: sha512-Rf7xmeuIo7nb6S4mp4abW2faW8DauZyE2faBIKFaUfP3wnpOvNSbiI5AwVhqBNj0jPgBWEvhyCu0sLjN2q77Rg==}
     engines: {node: '>= 14.0.0'}
 
+  angular-calendar@0.32.2:
+    resolution: {integrity: sha512-eVPim7FOBjx/e58bvuHUpN5IuiFz8k97+RjatKUJ2Lj8Anro5c34NTOgKgZ7uYRHhgL++yUOcXV4ar8D/bMcFA==}
+    peerDependencies:
+      '@angular/core': '>=20.2.0'
+      angular-draggable-droppable: ^9.0.1
+      angular-resizable-element: ^8.0.0
+      date-fns: ^4.0.0
+      moment: ^2.0.0
+    peerDependenciesMeta:
+      date-fns:
+        optional: true
+      moment:
+        optional: true
+
+  angular-draggable-droppable@9.0.1:
+    resolution: {integrity: sha512-nxxFzBMEzB6RsRUqnHWelt9G7QXG2wc18czYL75YhJ9IkBJOBkxXBd0ZOTeDgV9C3mmkkw+PMLJOayx0GH6gXA==}
+    peerDependencies:
+      '@angular/core': '>=20.0.0'
+
+  angular-resizable-element@8.0.3:
+    resolution: {integrity: sha512-Jf/iVj9BNOTjune/cpdRj+c2Rd0WFrVf9yXMILU2INmAS5GUqs7pBrsbJkGo4NrXMfOsb/vS+sXWbv60UAheHg==}
+    peerDependencies:
+      '@angular/core': '>=20.0.0'
+
   ansi-escapes@7.3.0:
     resolution: {integrity: sha512-BvU8nYgGQBxcmMuEeUEmNTvrMVjJNSH7RgW24vXexN4Ven6qCvy4TntnvlnwnMLTVlcRQQdbRY8NKnaIoeWDNg==}
     engines: {node: '>=18'}
@@ -1590,6 +1626,20 @@ packages:
   cacache@20.0.4:
     resolution: {integrity: sha512-M3Lab8NPYlZU2exsL3bMVvMrMqgwCnMWfdZbK28bn3pK6APT/Te/I8hjRPNu1uwORY9a1eEQoifXbKPQMfMTOA==}
     engines: {node: ^20.17.0 || >=22.9.0}
+
+  calendar-utils@0.12.5:
+    resolution: {integrity: sha512-resk9x4GGwzsea55oUmW4Gs52v97YitHsA4gfTbIfygGyBMYrQV6H0HyHJyI95FCK5mu7xKVDikMrywSY1hTlA==}
+    peerDependencies:
+      date-fns: ^4.0.0
+      luxon: ^3.0.0
+      moment: ^2.0.0
+    peerDependenciesMeta:
+      date-fns:
+        optional: true
+      luxon:
+        optional: true
+      moment:
+        optional: true
 
   call-bind-apply-helpers@1.0.2:
     resolution: {integrity: sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ==}
@@ -1711,6 +1761,9 @@ packages:
   data-urls@7.0.0:
     resolution: {integrity: sha512-23XHcCF+coGYevirZceTVD7NdJOqVn+49IHyxgszm+JIiHLoB2TkmPtsYkNWT1pvRSGkc35L6NHs0yHkN2SumA==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+
+  date-fns@4.4.0:
+    resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -2347,6 +2400,9 @@ packages:
     resolution: {integrity: sha512-hheHdokM8cdqCb0lcE3s+zT4t4W+vvjpGxsZlDnikarzx8tSzMebh3UiFtgqwFwnTnjYQcsyMF8ei2mCO/tpeA==}
     engines: {node: '>=18'}
     hasBin: true
+
+  positioning@3.0.1:
+    resolution: {integrity: sha512-cqg00fwFtEu14YwlLUuvFih5ztTd9RYUguJA55lWjeIGFQTpik7ca+TMU87YhAgwWjyjcGIG6l80eUh7X6uHog==}
 
   postcss-media-query-parser@0.2.3:
     resolution: {integrity: sha512-3sOlxmbKcSHMjlUXQZKQ06jOswE7oVkXPxmZdoB1r5l0q6gTFTQSHxNxOrCccElbW7dxNytifNEo8qidX2Vsig==}
@@ -3584,6 +3640,8 @@ snapshots:
   '@lmdb/lmdb-win32-x64@3.5.1':
     optional: true
 
+  '@mattlewis92/dom-autoscroller@2.4.2': {}
+
   '@modelcontextprotocol/sdk@1.26.0(zod@4.3.6)':
     dependencies:
       '@hono/node-server': 1.19.14(hono@4.12.23)
@@ -3947,6 +4005,8 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.4':
     optional: true
 
+  '@scarf/scarf@1.4.0': {}
+
   '@schematics/angular@21.2.13(chokidar@5.0.0)':
     dependencies:
       '@angular-devkit/core': 21.2.13(chokidar@5.0.0)
@@ -4195,6 +4255,31 @@ snapshots:
       '@algolia/requester-fetch': 5.48.1
       '@algolia/requester-node-http': 5.48.1
 
+  angular-calendar@0.32.2(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))(angular-draggable-droppable@9.0.1(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)))(angular-resizable-element@8.0.3(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)))(date-fns@4.4.0):
+    dependencies:
+      '@angular/core': 21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)
+      '@scarf/scarf': 1.4.0
+      angular-draggable-droppable: 9.0.1(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))
+      angular-resizable-element: 8.0.3(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2))
+      calendar-utils: 0.12.5(date-fns@4.4.0)
+      positioning: 3.0.1
+      tslib: 2.8.1
+    optionalDependencies:
+      date-fns: 4.4.0
+    transitivePeerDependencies:
+      - luxon
+
+  angular-draggable-droppable@9.0.1(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)):
+    dependencies:
+      '@angular/core': 21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)
+      '@mattlewis92/dom-autoscroller': 2.4.2
+      tslib: 2.8.1
+
+  angular-resizable-element@8.0.3(@angular/core@21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)):
+    dependencies:
+      '@angular/core': 21.2.15(@angular/compiler@21.2.15)(rxjs@7.8.2)
+      tslib: 2.8.1
+
   ansi-escapes@7.3.0:
     dependencies:
       environment: 1.1.0
@@ -4275,6 +4360,10 @@ snapshots:
       minipass-pipeline: 1.2.4
       p-map: 7.0.4
       ssri: 13.0.1
+
+  calendar-utils@0.12.5(date-fns@4.4.0):
+    optionalDependencies:
+      date-fns: 4.4.0
 
   call-bind-apply-helpers@1.0.2:
     dependencies:
@@ -4388,6 +4477,8 @@ snapshots:
       whatwg-url: 16.0.1
     transitivePeerDependencies:
       - '@noble/hashes'
+
+  date-fns@4.4.0: {}
 
   debug@4.4.3:
     dependencies:
@@ -5092,6 +5183,8 @@ snapshots:
       playwright-core: 1.60.0
     optionalDependencies:
       fsevents: 2.3.2
+
+  positioning@3.0.1: {}
 
   postcss-media-query-parser@0.2.3: {}
 

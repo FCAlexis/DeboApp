@@ -95,6 +95,46 @@ export class DebtStateService {
     return balances;
   });
 
+  // --- Report Signals ---
+
+  /** Group installments by month-year for trend chart */
+  readonly monthlyInstallments = computed(() => {
+    const byMonth = new Map<string, { totalCents: number; paidCents: number; count: number }>();
+
+    for (const inst of this.installments()) {
+      const key = `${inst.dueDate.getFullYear()}-${String(inst.dueDate.getMonth() + 1).padStart(2, '0')}`;
+      const entry = byMonth.get(key) || { totalCents: 0, paidCents: 0, count: 0 };
+      entry.totalCents += inst.amountCents;
+      entry.paidCents += inst.amountPaidCents;
+      entry.count++;
+      byMonth.set(key, entry);
+    }
+
+    return Array.from(byMonth.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, data]) => ({ month, ...data, remainingCents: data.totalCents - data.paidCents }));
+  });
+
+  /** Total paid per person */
+  readonly paidByPerson = computed(() => {
+    const byPerson = new Map<string, number>();
+    for (const p of this.payments()) {
+      byPerson.set(p.personId, (byPerson.get(p.personId) || 0) + p.amountCents);
+    }
+    return byPerson;
+  });
+
+  /** Persons enriched with both owed and paid amounts */
+  readonly personsWithPaid = computed(() => {
+    const paid = this.paidByPerson();
+    const debt = this.debtByPerson();
+    return this.persons().map(p => ({
+      ...p,
+      owedCents: Math.max(0, debt[p.id] || 0),
+      paidCents: paid.get(p.id) || 0,
+    }));
+  });
+
   // Lista de personas enriquecida con su saldo
   personsWithBalance = computed(() => {
     const balances = this.debtByPerson();

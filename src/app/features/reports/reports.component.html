@@ -1,0 +1,91 @@
+<div class="reports-layout">
+  <!-- Period Selector -->
+  <div class="period-selector">
+    <button
+      class="period-btn"
+      [class.active]="period() === '6m'"
+      (click)="period.set('6m')"
+    >
+      Últimos 6 meses
+    </button>
+    <button
+      class="period-btn"
+      [class.active]="period() === '1y'"
+      (click)="period.set('1y')"
+    >
+      Último año
+    </button>
+    <button
+      class="period-btn"
+      [class.active]="period() === 'all'"
+      (click)="period.set('all')"
+    >
+      Todo
+    </button>
+  </div>
+
+  <!-- Recovery Rate Card -->
+  <div class="recovery-card">
+    <div class="recovery-label">Tasa de Recuperación</div>
+    <div class="recovery-value-row">
+      <span class="recovery-value">{{ recoveryWithTrend().rate }}%</span>
+      <span class="trend-indicator" [class.trend-up]="recoveryWithTrend().trend === 'up'"
+                                   [class.trend-down]="recoveryWithTrend().trend === 'down'"
+                                   [class.trend-flat]="recoveryWithTrend().trend === 'flat'">
+        @if (recoveryWithTrend().trend === 'up') { ↑ }
+        @if (recoveryWithTrend().trend === 'down') { ↓ }
+        @if (recoveryWithTrend().trend === 'flat') { → }
+      </span>
+    </div>
+    <div class="recovery-subtext">
+      Período seleccionado
+    </div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Deuda en el Tiempo</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="debtTrendChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Recuperación por Persona</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="personChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Distribución de Pagos</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="distributionChart"></canvas>
+        @if (!hasDistributionData()) {
+          <div class="chart-empty-overlay">
+            <span>Sin pagos registrados</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Buttons -->
+  <div class="export-section">
+    <button class="export-btn" (click)="exportCSV()">
+      <i class="bi bi-file-earmark-spreadsheet"></i>
+      Exportar CSV
+    </button>
+    <button class="export-btn" (click)="exportJSON()">
+      <i class="bi bi-file-earmark-code"></i>
+      Exportar JSON
+    </button>
+  </div>
+</div>

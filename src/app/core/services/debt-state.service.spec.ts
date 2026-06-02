@@ -245,6 +245,111 @@ describe('DebtStateService', () => {
     });
   });
 
+  describe('monthlyInstallments', () => {
+    it('should return empty array when no installments', () => {
+      expect(service.monthlyInstallments()).toEqual([]);
+    });
+
+    it('should group installments by YYYY-MM key with aggregated values', () => {
+      service.setInstallments([
+        makeInstallment({ id: 'i1', amountCents: 10000, amountPaidCents: 2000, dueDate: new Date(2026, 4, 15) }), // May
+        makeInstallment({ id: 'i2', amountCents: 20000, amountPaidCents: 5000, dueDate: new Date(2026, 5, 10) }), // Jun
+      ]);
+
+      const result = service.monthlyInstallments();
+      expect(result).toHaveLength(2);
+      expect(result[0].month).toBe('2026-05');
+      expect(result[0].totalCents).toBe(10000);
+      expect(result[0].paidCents).toBe(2000);
+      expect(result[0].remainingCents).toBe(8000);
+      expect(result[0].count).toBe(1);
+      expect(result[1].month).toBe('2026-06');
+      expect(result[1].totalCents).toBe(20000);
+      expect(result[1].remainingCents).toBe(15000);
+    });
+
+    it('should combine multiple installments in the same month', () => {
+      service.setInstallments([
+        makeInstallment({ id: 'i1', amountCents: 10000, amountPaidCents: 1000, dueDate: new Date(2026, 4, 5) }),
+        makeInstallment({ id: 'i2', amountCents: 15000, amountPaidCents: 3000, dueDate: new Date(2026, 4, 20) }),
+      ]);
+
+      const result = service.monthlyInstallments();
+      expect(result).toHaveLength(1);
+      expect(result[0].month).toBe('2026-05');
+      expect(result[0].totalCents).toBe(25000);
+      expect(result[0].paidCents).toBe(4000);
+      expect(result[0].remainingCents).toBe(21000);
+      expect(result[0].count).toBe(2);
+    });
+
+    it('should sort months chronologically', () => {
+      service.setInstallments([
+        makeInstallment({ id: 'i3', amountCents: 5000, dueDate: new Date(2026, 11, 1) }),  // Dec
+        makeInstallment({ id: 'i1', amountCents: 5000, dueDate: new Date(2025, 11, 1) }),  // Dec 2025
+        makeInstallment({ id: 'i2', amountCents: 5000, dueDate: new Date(2026, 0, 1) }),   // Jan
+      ]);
+
+      const result = service.monthlyInstallments();
+      expect(result[0].month).toBe('2025-12');
+      expect(result[1].month).toBe('2026-01');
+      expect(result[2].month).toBe('2026-12');
+    });
+  });
+
+  describe('paidByPerson', () => {
+    it('should return empty map when no payments', () => {
+      expect(service.paidByPerson().size).toBe(0);
+    });
+
+    it('should sum payments per person', () => {
+      service.setPayments([
+        makePayment({ personId: 'p1', amountCents: 10000 }),
+        makePayment({ personId: 'p2', amountCents: 20000 }),
+        makePayment({ personId: 'p1', amountCents: 5000 }),
+      ]);
+
+      const result = service.paidByPerson();
+      expect(result.get('p1')).toBe(15000);
+      expect(result.get('p2')).toBe(20000);
+    });
+  });
+
+  describe('personsWithPaid', () => {
+    it('should enrich persons with owed and paid amounts', () => {
+      service.setPersons([
+        makePerson({ id: 'p1', name: 'Juan' }),
+        makePerson({ id: 'p2', name: 'María' }),
+      ]);
+      service.setInstallments([
+        makeInstallment({ personId: 'p1', amountCents: 50000, amountPaidCents: 0 }),
+        makeInstallment({ personId: 'p2', amountCents: 30000, amountPaidCents: 0 }),
+      ]);
+      service.setPayments([
+        makePayment({ personId: 'p1', amountCents: 10000 }),
+        makePayment({ personId: 'p2', amountCents: 30000 }),
+      ]);
+
+      const result = service.personsWithPaid();
+      expect(result).toHaveLength(2);
+      const p1 = result.find(p => p.id === 'p1')!;
+      const p2 = result.find(p => p.id === 'p2')!;
+      expect(p1.owedCents).toBe(40000); // 50000 - 10000
+      expect(p1.paidCents).toBe(10000);
+      expect(p2.owedCents).toBe(0); // 30000 - 30000
+      expect(p2.paidCents).toBe(30000);
+    });
+
+    it('should show 0 owed when person has no installments but has payments', () => {
+      service.setPersons([makePerson({ id: 'p1', name: 'Juan' })]);
+      service.setPayments([makePayment({ personId: 'p1', amountCents: 5000 })]);
+
+      const result = service.personsWithPaid();
+      expect(result[0].owedCents).toBe(0);
+      expect(result[0].paidCents).toBe(5000);
+    });
+  });
+
   describe('mutations', () => {
     it('should add person via addPerson', () => {
       const person = makePerson();

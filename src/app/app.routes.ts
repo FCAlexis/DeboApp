@@ -8,6 +8,8 @@ import { PlaceholderComponent } from './core/components/placeholder.component';
 import { BackupComponent } from './features/backup/backup.component';
 import { DebtsComponent } from './features/debts/debts.component';
 import { PaymentsListComponent } from './features/payments/payments-list.component';
+import { CalendarComponent } from './features/calendar/calendar.component';
+import { ReportsComponent } from './features/reports/reports.component';
 
 export const routes: Routes = [
   {
@@ -48,8 +50,8 @@ export const routes: Routes = [
     path: 'payments',
     component: PaymentsListComponent
   },
-  { path: 'calendar', component: PlaceholderComponent },
-  { path: 'reports', component: PlaceholderComponent },
+  { path: 'calendar', component: CalendarComponent },
+  { path: 'reports', component: ReportsComponent },
   { path: 'settings', component: PlaceholderComponent },
   { path: 'help', component: PlaceholderComponent },
 ];
