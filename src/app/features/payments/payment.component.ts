@@ -147,6 +147,16 @@ import { PaymentResult } from '../../core/payment-engine';
     .allocations-list { display: flex; flex-direction: column; gap: 0.75rem; }
     .allocation-item { display: flex; justify-content: space-between; background: var(--bg-light); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--text-main); }
     .item-value { font-weight: 600; color: var(--success-color); }
+
+    @media (max-width: 600px) {
+      .payment-card, .receipt-card {
+        padding: 1.5rem;
+      }
+      .back-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+    }
   `]
 })
 export class PaymentComponent {

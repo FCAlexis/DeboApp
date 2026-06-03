@@ -1,23 +1,40 @@
-import { TestBed } from '@angular/core/testing';
+import { Injector, runInInjectionContext } from '@angular/core';
+import { Router } from '@angular/router';
+import { DebtService } from './core/services/debt.service';
 import { App } from './app';
+import { describe, it, expect, vi } from 'vitest';
 
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
-  });
+  const setupComponent = () => {
+    const mockRouter = {} as Router;
+    const mockDebtService = {
+      loadInitialData: vi.fn().mockResolvedValue(undefined),
+    } as unknown as DebtService;
+
+    const injector = Injector.create({
+      providers: [
+        { provide: Router, useValue: mockRouter },
+        { provide: DebtService, useValue: mockDebtService },
+      ],
+    });
+
+    const component = runInInjectionContext(injector, () => new App());
+    return { component, mockDebtService };
+  };
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    const { component } = setupComponent();
+    expect(component).toBeTruthy();
   });
 
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, web-app');
+  it('should load initial data on init', async () => {
+    const { component, mockDebtService } = setupComponent();
+    await component.ngOnInit();
+    expect(mockDebtService.loadInitialData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should have a title signal with value "web-app"', () => {
+    const { component } = setupComponent();
+    expect((component as unknown as { title: () => string }).title()).toBe('web-app');
   });
 });

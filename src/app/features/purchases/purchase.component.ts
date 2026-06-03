@@ -251,6 +251,16 @@ import { DebtStateService } from '../../core/services/debt-state.service';
       cursor: not-allowed;
       transform: none;
     }
+
+    @media (max-width: 600px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .back-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+    }
   `]
 })
 export class PurchaseComponent implements OnInit {

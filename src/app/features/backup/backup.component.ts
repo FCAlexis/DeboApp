@@ -118,6 +118,10 @@ import { NotificationService } from '../../core/services/notification.service';
     .modal-footer { display: flex; gap: 1rem; justify-content: center; }
     .btn-cancel { padding: 0.8rem 1.5rem; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; color: var(--text-muted); }
     .btn-confirm { padding: 0.8rem 1.5rem; background: var(--danger-color); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; }
+    @media (max-width: 600px) {
+      .action-item { flex-direction: column; align-items: flex-start; }
+      .back-btn { min-width: 44px; min-height: 44px; }
+    }
   `]
 })
 export class BackupComponent {
