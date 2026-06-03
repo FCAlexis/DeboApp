@@ -337,6 +337,16 @@ import { formatCurrency } from '../../core/utils/format-currency';
       font-size: 3rem;
       opacity: 0.3;
     }
+
+    @media (max-width: 600px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .back-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+    }
   `]
 })
 export class PaymentsListComponent {

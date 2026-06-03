@@ -518,6 +518,16 @@ export type InstallmentStatus = 'PAID' | 'OVERDUE' | 'COMING_SOON' | 'FUTURE';
       cursor: pointer;
       font-weight: 600;
     }
+
+    @media (max-width: 600px) {
+      .profile-actions {
+        grid-template-columns: 1fr;
+      }
+      .back-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+    }
   `]
 })
 export class PersonDetailComponent {

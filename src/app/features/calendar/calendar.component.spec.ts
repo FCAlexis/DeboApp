@@ -1,4 +1,5 @@
 import { signal, computed, Injector, runInInjectionContext } from '@angular/core';
+import { Router } from '@angular/router';
 import { CalendarComponent } from './calendar.component';
 import { DebtStateService } from '../../core/services/debt-state.service';
 import { Installment, Person } from '../../core/models/debt.model';
@@ -74,6 +75,7 @@ describe('CalendarComponent', () => {
     const injector = Injector.create({
       providers: [
         { provide: DebtStateService, useValue: mockState as any },
+        { provide: Router, useValue: { navigate: () => {} } },
       ],
     });
 

@@ -79,6 +79,15 @@ import { NotificationService } from '../../core/services/notification.service';
     .type-warning i { color: var(--warning-color); }
     .type-info { border-left-color: var(--primary-color); }
     .type-info i { color: var(--primary-color); }
+    /* Responsive */
+    @media (max-width: 400px) {
+      .notification-container {
+        top: 10px;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+      }
+    }
   `]
 })
 export class NotificationContainerComponent {
